@@ -1,0 +1,72 @@
+<script>
+    // Connect to the WebSocket
+    var ws = new WebSocket('wss://goodvibez.onrender.com/');
+
+    ws.onmessage = function(event) {
+        // Parse the message data
+        var message = JSON.parse(event.data);
+
+        // Find the HTML element that corresponds to the old message
+        var oldMessageElement = document.getElementById('message-' + message._id);
+
+        if (oldMessageElement) {
+            // If the old message element exists, update its content
+            oldMessageElement.querySelector('.message-user').innerHTML = message.username;
+            oldMessageElement.querySelector('.message-text').innerHTML = message.text;
+            oldMessageElement.querySelector('.message-time').innerHTML = message.timestamp;
+        } else {
+            // If the old message element does not exist, this is a new message,
+            // so create a new HTML element and append it to the message list
+            var messageContainer = document.createElement('div');
+            var messageUser = document.createElement('p');
+            var messageText = document.createElement('p');
+            var messageTime = document.createElement('p');
+            // Set the innerHTML of the new element to the message data
+            messageUser.innerHTML = message.username;
+            messageText.innerHTML = message.text;
+            messageTime.innerHTML = message.timestamp;
+            // Append the new elements to the container
+            messageContainer.appendChild(messageUser);
+            messageContainer.appendChild(messageText);
+            messageContainer.appendChild(messageTime);
+            // Assign the unique ID to the message container
+            messageContainer.id = 'message-' + message._id;
+            messageContainer.className = 'message';
+            // Add classes to the message elements
+            messageUser.className = 'message-user';
+            messageText.className = 'message-text';
+            messageTime.className = 'message-time';
+            // Append the message container to the main container
+            document.getElementById('message-container').appendChild(messageContainer);
+        }
+    };
+
+    // Fetch all messages from the API
+    fetch('http://localhost:3000/api/v1/messages')
+        .then(response => response.json())
+        .then(messages => {
+            // Loop through each message
+            messages.forEach(message => {
+                // Create a new HTML element
+                var messageElement = document.createElement('p');
+                // Set the innerHTML of the new element to the message data
+                messageElement.innerHTML = message.text;
+                // Append the new element to the container
+                document.getElementById('message-container').appendChild(messageElement);
+            });
+        });
+</script>
+</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/main.css">
+    <title>GoodVibez - The Test Place</title>
+</head>
+<body>
+    <h1 style="text-align: center;">Test Place</h1>
+    <div id="message-container"></div>
+</body>
+</html>

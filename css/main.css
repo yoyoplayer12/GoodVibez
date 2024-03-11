@@ -1,0 +1,13 @@
+#message-container{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.message{
+    background-color: rgb(221, 221, 221);
+    width: fit-content;
+    padding: 15px 30px;
+    margin: 10px;
+}
