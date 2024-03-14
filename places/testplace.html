@@ -1,51 +1,61 @@
 <script>
     // Connect to the WebSocket
     var ws = new WebSocket('wss://goodvibez.onrender.com/');
-
+    var messages = [];
     ws.onmessage = function(event) {
         // Parse the message data
         var message = JSON.parse(event.data);
+        messages.push(message);
+        messages.sort(function(a, b) {
+            return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+        var messageContainer = document.getElementById('message-container');
+        messageContainer.innerHTML = '';
+        messages.forEach(function(message) {
+            var date = new Date(message.timestamp);
+            var formattedDate = date.getFullYear() + '-' + 
+                                ('0' + (date.getMonth()+1)).slice(-2) + '-' + 
+                                ('0' + date.getDate()).slice(-2) + ' at ' + 
+                                ('0' + date.getHours()).slice(-2) + ':' + 
+                                ('0' + date.getMinutes()).slice(-2);
+            var messageElement = document.createElement('div');
+            // Check if the message has been reported before
+            var reportedMessages = JSON.parse(localStorage.getItem('reportedMessages')) || [];
+            var isReported = reportedMessages.includes(message._id);
+            var svgPath = isReported ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#707070" d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32V64 368 480c0 17.7 14.3 32 32 32s32-14.3 32-32V352l64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48V32z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#707070" d="M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24V64 350.5 400v88c0 13.3 10.7 24 24 24s24-10.7 24-24V388l80.3-20.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L48 52V24zm0 77.5l96.6-24.2c27-6.7 55.5-3.6 80.4 8.8c54.9 27.4 118.7 29.7 175 6.8V334.7l-24.4 9.1c-33.7 12.6-71.2 10.7-103.4-5.4c-48.2-24.1-103.3-30.1-155.6-17.1L48 338.5v-237z"/></svg>';
+            messageElement.innerHTML = '<p class="message-user">' + message.username + '</p>' +
+                                       '<p class="message-text">' + message.text + '</p>' +
+                                       '<p class="message-time">' + formattedDate + '</p>' +
+                                       '<a class="message-report">' + svgPath + '</a>'
+            messageElement.className = 'message';
+            messageElement.id = 'message-' + message._id;
+            messageContainer.appendChild(messageElement);
+            var reportButton = messageElement.querySelector('.message-report');
+            reportButton.addEventListener('click', function(event){
+                event.preventDefault();
+                // Check if the message has been reported before
+                var reportedMessages = JSON.parse(localStorage.getItem('reportedMessages')) || [];
+                var index = reportedMessages.indexOf(message._id);
+                if (!isReported) {
+                    reportedMessages.push(message._id);
+                    localStorage.setItem('reportedMessages', JSON.stringify(reportedMessages));
+                    reportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#707070" d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32V64 368 480c0 17.7 14.3 32 32 32s32-14.3 32-32V352l64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48V32z"/></svg>'
+                    isReported = true;
+                    console.log('Reported' + message._id);
+                    // Send a PUT request + report alert
 
-        // Find the HTML element that corresponds to the old message
-        var oldMessageElement = document.getElementById('message-' + message._id);
-        var date = new Date(message.timestamp);
-        var formattedDate = date.getFullYear() + '-' + 
-                            ('0' + (date.getMonth()+1)).slice(-2) + '-' + 
-                            ('0' + date.getDate()).slice(-2) + ' at ' + 
-                            ('0' + date.getHours()).slice(-2) + ':' + 
-                            ('0' + date.getMinutes()).slice(-2);
 
-        if (oldMessageElement) {
-            // If the old message element exists, update its content
-            oldMessageElement.querySelector('.message-user').innerHTML = message.username;
-            oldMessageElement.querySelector('.message-text').innerHTML = message.text;
-            oldMessageElement.querySelector('.message-time').innerHTML = formattedDate;
-        } else {
-            // If the old message element does not exist, this is a new message,
-            // so create a new HTML element and append it to the message list
-            var messageContainer = document.createElement('div');
-            var messageUser = document.createElement('p');
-            var messageText = document.createElement('p');
-            var messageTime = document.createElement('p');
-            // Set the innerHTML of the new element to the message data
-            messageUser.innerHTML = message.username;
-            messageText.innerHTML = message.text;
-            messageTime.innerHTML = formattedDate;
-            // Append the new elements to the container
-            messageContainer.appendChild(messageUser);
-            messageContainer.appendChild(messageText);
-            messageContainer.appendChild(messageTime);
-            // Assign the unique ID to the message container
-            messageContainer.id = 'message-' + message._id;
-            messageContainer.className = 'message';
-            // Add classes to the message elements
-            messageUser.className = 'message-user';
-            messageText.className = 'message-text';
-            messageTime.className = 'message-time';
-            // Append the message container to the main container
-            document.getElementById('message-container').appendChild(messageContainer);
-        }
-    };
+                } else {
+                    reportedMessages.splice(index, 1);
+                    reportButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#707070" d="M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24V64 350.5 400v88c0 13.3 10.7 24 24 24s24-10.7 24-24V388l80.3-20.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L48 52V24zm0 77.5l96.6-24.2c27-6.7 55.5-3.6 80.4 8.8c54.9 27.4 118.7 29.7 175 6.8V334.7l-24.4 9.1c-33.7 12.6-71.2 10.7-103.4-5.4c-48.2-24.1-103.3-30.1-155.6-17.1L48 338.5v-237z"/></svg>';
+                    console.log('Unreported ' + message._id);
+                    isReported = false;
+                    //send PUT
+                }
+                localStorage.setItem('reportedMessages', JSON.stringify(reportedMessages));
+            });
+        });
+};
 document.addEventListener('DOMContentLoaded', (event) => {
     var submitInput = document.querySelector('.submit-input');
 
@@ -84,10 +94,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
             console.error('Error:', error);
         });
     }
+    });
 });
-});
-
-</script>
 </script>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,12 +107,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
 </head>
 <body>
     <h1 style="text-align: center;">Test Place</h1>
+    <h3>Leave your good vibes here!</h3>
     <div class="send-wrapper">
-        <input type="text" placeholder="Username" class="username-input">
-        <input type="text" placeholder="Message" class="message-input">
+        <input type="text" placeholder="Username" class="username-input" required>
+        <textarea type="text" placeholder="Message..." class="message-input" required></textarea>
         <input type="submit" class="submit-input">
     </div>
     <h2>Messages:</h2>
     <div id="message-container"></div>
 </body>
 </html>
+
