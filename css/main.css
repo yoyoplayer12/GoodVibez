@@ -36,6 +36,7 @@ h2{
     color: white;
     cursor: pointer;
     margin-bottom: 30px;
+    height: 40px;
 }
 #message-container{
     width: 100%;
