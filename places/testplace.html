@@ -46,21 +46,47 @@
             document.getElementById('message-container').appendChild(messageContainer);
         }
     };
+document.addEventListener('DOMContentLoaded', (event) => {
+    var submitInput = document.querySelector('.submit-input');
 
-    // Fetch all messages from the API
-    fetch('http://localhost:3000/api/v1/messages')
+    // Add an event listener to the submit button
+    submitInput.addEventListener('click', function(event) {
+    // Prevent the default form submission
+    event.preventDefault();
+    var usernameInput = document.querySelector('.username-input');
+    var messageInput = document.querySelector('.message-input');
+    // Get the input values
+    var username = usernameInput.value;
+    var message = messageInput.value;
+
+    // Make sure both inputs are not empty
+    if (username && message) {
+        // Send a POST request
+        fetch('https://goodvibez.onrender.com/api/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                text: message,
+            }),
+        })
         .then(response => response.json())
-        .then(messages => {
-            // Loop through each message
-            messages.forEach(message => {
-                // Create a new HTML element
-                var messageElement = document.createElement('p');
-                // Set the innerHTML of the new element to the message data
-                messageElement.innerHTML = message.text;
-                // Append the new element to the container
-                document.getElementById('message-container').appendChild(messageElement);
-            });
+        .then(data => {
+            // Clear the input fields
+            usernameInput.value = '';
+            messageInput.value = '';
+            // Handle the response data
+            console.log('Message sent:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
         });
+    }
+});
+});
+
 </script>
 </script>
 <!DOCTYPE html>
