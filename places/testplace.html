@@ -8,12 +8,18 @@
 
         // Find the HTML element that corresponds to the old message
         var oldMessageElement = document.getElementById('message-' + message._id);
+        var date = new Date(message.timestamp);
+        var formattedDate = date.getFullYear() + '-' + 
+                            ('0' + (date.getMonth()+1)).slice(-2) + '-' + 
+                            ('0' + date.getDate()).slice(-2) + ' at ' + 
+                            ('0' + date.getHours()).slice(-2) + ':' + 
+                            ('0' + date.getMinutes()).slice(-2);
 
         if (oldMessageElement) {
             // If the old message element exists, update its content
             oldMessageElement.querySelector('.message-user').innerHTML = message.username;
             oldMessageElement.querySelector('.message-text').innerHTML = message.text;
-            oldMessageElement.querySelector('.message-time').innerHTML = message.timestamp;
+            oldMessageElement.querySelector('.message-time').innerHTML = formattedDate;
         } else {
             // If the old message element does not exist, this is a new message,
             // so create a new HTML element and append it to the message list
@@ -24,7 +30,7 @@
             // Set the innerHTML of the new element to the message data
             messageUser.innerHTML = message.username;
             messageText.innerHTML = message.text;
-            messageTime.innerHTML = message.timestamp;
+            messageTime.innerHTML = formattedDate;
             // Append the new elements to the container
             messageContainer.appendChild(messageUser);
             messageContainer.appendChild(messageText);
@@ -67,6 +73,12 @@
 </head>
 <body>
     <h1 style="text-align: center;">Test Place</h1>
+    <div class="send-wrapper">
+        <input type="text" placeholder="Username" class="username-input">
+        <input type="text" placeholder="Message" class="message-input">
+        <input type="submit" class="submit-input">
+    </div>
+    <h2>Messages:</h2>
     <div id="message-container"></div>
 </body>
 </html>
