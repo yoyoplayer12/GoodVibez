@@ -1,1 +1,8 @@
-fix ws when changing removed state
+musts:
+- fix ws when changing removed state
+- fix ai on fields for control
+- backend for removing
+-reporting
+
+nice to haves:
+- likes?
