@@ -1,23 +1,56 @@
 <script>
-    // Connect to the WebSocket
-    var ws = new WebSocket('wss://goodvibez.onrender.com/');
-    var messages = [];
-    ws.onmessage = function(event) {
-        // Parse the message data
-        var message = JSON.parse(event.data);
-        messages.push(message);
-        messages.sort(function(a, b) {
-            return new Date(b.timestamp) - new Date(a.timestamp);
-        });
-        var messageContainer = document.getElementById('message-container');
-        messageContainer.innerHTML = '';
-        messages.forEach(function(message) {
-            var date = new Date(message.timestamp);
-            var formattedDate = date.getFullYear() + '-' + 
-                                ('0' + (date.getMonth()+1)).slice(-2) + '-' + 
-                                ('0' + date.getDate()).slice(-2) + ' at ' + 
-                                ('0' + date.getHours()).slice(-2) + ':' + 
-                                ('0' + date.getMinutes()).slice(-2);
+// Connect to the WebSocket
+var ws = new WebSocket('wss://goodvibez.onrender.com/');
+var messages = [];
+var messageReceived = false;
+
+ws.onmessage = function(event) {
+    if(messageReceived === false) {
+        var messagesheader = document.querySelector('.messages-header');
+        messagesheader.textContent = 'Messages:';
+    }
+    messageReceived = true;
+    // Parse the message data
+    var message = JSON.parse(event.data);
+    messages.push(message);
+    messages.sort(function(a, b) {
+        return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+    var messageContainer = document.getElementById('message-container');
+    messageContainer.innerHTML = '';
+    var currentDateHeader = null;
+    var oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    var oneYearAgo = new Date();
+    oneYearAgo.setDate(oneYearAgo.getDate() - 365);
+    console.log(oneYearAgo);
+    messages.forEach(function(message) {
+        var date = new Date(message.timestamp);
+        var formattedDate = date.getFullYear() + '-' + 
+                            ('0' + (date.getMonth()+1)).slice(-2) + '-' + 
+                            ('0' + date.getDate()).slice(-2) + ' at ' + 
+                            ('0' + date.getHours()).slice(-2) + ':' + 
+                            ('0' + date.getMinutes()).slice(-2);
+                            var today = new Date();
+        today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for accurate comparison
+        date.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for accurate comparison
+
+        var dateHeader;
+        if (+date === +today) {
+            dateHeader = "Today";
+        } else if (date > oneWeekAgo) {
+            dateHeader = date.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long'} );
+        } else if (date > oneYearAgo) {
+            dateHeader = date.toLocaleDateString('nl-BE', { month: 'long', year: 'numeric' });
+        } else {
+            dateHeader = date.toLocaleDateString('nl-BE', { year: 'numeric' });
+        }
+        if (dateHeader !== currentDateHeader) {
+            var dateElement = document.createElement('h4');
+            dateElement.textContent = dateHeader;
+            messageContainer.appendChild(dateElement);
+            currentDateHeader = dateHeader;
+        }
             var messageElement = document.createElement('div');
             // Check if the message has been reported before
             var reportedMessages = JSON.parse(localStorage.getItem('reportedMessages')) || [];
@@ -95,7 +128,23 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
     });
-});
+    titlewrapper = document.querySelector('.title-wrapper');
+    vibewrapper = document.querySelector('.vibe-wrapper');
+    arrow = document.querySelector('.turn-arrow');
+    titlewrapper.addEventListener('click', function(event) {
+        vibewrapper.classList.toggle('vibe-wrapper-active');
+        arrow.classList.toggle('turn-arrow-active');
+    });
+    // Set a timeout to check if any messages were received
+    setTimeout(function() {
+        if (!messageReceived) {
+            var messageContainer = document.getElementById('message-container');
+            var messagesheader = document.querySelector('.messages-header');
+            messageContainer.innerHTML = '<img class="no-messages-giph" src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZtemZmazl1bnBkOWdmZHJ5MHU4cW1uOWNmcjUxYnc2ZDJkcDNvdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUOrwihszfWZgSIHJK/giphy.gif" alt="No messages">';
+            messagesheader.textContent = 'No messages yet 🫠';
+        }
+    }, 300); // Wait for 5 seconds
+    });
 </script>
 <!DOCTYPE html>
 <html lang="en">
@@ -107,14 +156,21 @@ document.addEventListener('DOMContentLoaded', (event) => {
 </head>
 <body>
     <h1 style="text-align: center;">Test Place</h1>
-    <h3>Leave your good vibes here!</h3>
-    <div class="send-wrapper">
-        <input type="text" placeholder="Username" class="username-input" required>
-        <textarea type="text" placeholder="Message..." class="message-input" required></textarea>
-        <input type="submit" class="submit-input">
+    <div class="vibe-wrapper">
+        <div class="title-wrapper">
+            <h3>Leave your good vibes here!<svg class="turn-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><path fill="#ffffff" d="M9.4 278.6c-12.5-12.5-12.5-32.8 0-45.3l128-128c9.2-9.2 22.9-11.9 34.9-6.9s19.8 16.6 19.8 29.6l0 256c0 12.9-7.8 24.6-19.8 29.6s-25.7 2.2-34.9-6.9l-128-128z"/></svg></h3>
+        </div>
+        <div class="send-wrapper">
+            <input type="text" placeholder="Username" class="username-input" required>
+            <textarea type="text" placeholder="Message..." class="message-input" required></textarea>
+            <input type="submit" class="submit-input">
+        </div>
     </div>
-    <h2>Messages:</h2>
+    <h2 class="messages-header">Messages:</h2>
     <div id="message-container"></div>
+    <footer>
+        <p class="footertext">GoodVibez 2024 - Made by Zwabber</p>
+    </footer>
 </body>
 </html>
 
