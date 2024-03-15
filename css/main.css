@@ -2,20 +2,58 @@ body{
     font-family: Arial, Helvetica, sans-serif;
     background-color: rgb(37, 37, 37);
     color: white;
+    margin: 0;
 }
 h1{
     text-align: center;
     margin-top: 20px;
+    background-color: rgb(56, 56, 56);
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 40px;
+    padding-bottom: 20px;
+    filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.4));
 }
 h2{
-    margin-left: 10%;
     margin-bottom: 10px;
     margin-top: 0;
+    text-align: center;
 }
 h3{
     margin-left: 10%;
     font-size: 16px;
-    margin-top: 40px;
+}
+h4{
+    width: 100%;
+    text-align: center;
+}
+.vibe-wrapper{
+    background-color: rgb(55, 55, 55);
+    padding-top: 10px;
+    margin-bottom: 40px;
+    overflow: hidden;
+    height: 50px;
+    transition: height 0.3s ease;
+}
+.vibe-wrapper.vibe-wrapper-active{
+    height: 270px;
+    transition: height 0.3s ease;
+}
+.turn-arrow{
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+    position: absolute;
+    top: 132px;
+    right: 10%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+.turn-arrow.turn-arrow-active{
+    transform: translateY(-50%) rotate(-90deg);
+    transition: transform 0.3s ease;
 }
 .send-wrapper{
     display: flex;
@@ -45,6 +83,7 @@ h3{
     padding: 10px;
     border-radius: 10px;
     border: none;
+    font-size: 14px;
 }
 .send-wrapper .submit-input{
     border-radius: 10px;
@@ -54,6 +93,7 @@ h3{
     cursor: pointer;
     margin-bottom: 30px;
     height: 40px;
+    font-size: 14px;
 }
 #message-container{
     width: 100%;
@@ -70,6 +110,7 @@ h3{
     margin: 10px;
     border-radius: 10px;
     height: fit-content;
+    filter: drop-shadow(1px 1px 8px rgba(0, 0, 0, 0.3));
 }
 .message p{
     margin: 0;
@@ -93,4 +134,15 @@ h3{
     height: 15px;
     margin-left: 10px;
     display: inline-block;
+}
+img.no-messages-giph{
+    max-width: 400px;
+    width: 80%
+}
+p.footertext{
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: rgb(112, 112, 112);
 }
