@@ -88,7 +88,12 @@ ws.onmessage = function(event) {
                 localStorage.setItem('reportedMessages', JSON.stringify(reportedMessages));
             });
         });
-};
+}
+function sanitizeInput(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
 document.addEventListener('DOMContentLoaded', (event) => {
     var submitInput = document.querySelector('.submit-input');
 
@@ -99,8 +104,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
     var usernameInput = document.querySelector('.username-input');
     var messageInput = document.querySelector('.message-input');
     // Get the input values
-    var username = usernameInput.value;
-    var message = messageInput.value;
+    var username = sanitizeInput(usernameInput.value);
+    var message = sanitizeInput(messageInput.value);
 
     // Make sure both inputs are not empty
     if (username && message) {
